@@ -18,15 +18,15 @@ BEGIN {
     print ARGC
     print length(ARGV[1])
     print length(ENVIRON["WORK_LOG_FILE"])
-    if (ARGC != 2) {
+    logf = ENVIRON["WORK_LOG_FILE"]
+    if (length(cliarg) == 0) {
             print "Usage information: blah blah blah, boring "
             exit 1
         }
     # parse the command line options.
-    if (ARGV[1] == "start") {
+    if (cliarg == "start") {
             print "Starting the clock for today."
             # Check if the log-file is present.
-            logf = ENVIRON["WORK_LOG_FILE"]
             if (length(logf) == 0) {
                 print "Please set the WORK_LOG_FILE variable"
                 exit 1
@@ -45,22 +45,76 @@ BEGIN {
             # Start the working day \o/
             # str = sprintf("")
             tformat = "%h:%s"
-            cmd = sprintf("echo \"$(date -R) # working\" >> %s", logf)
+            cmd = sprintf("echo \"$(date -R) ? working\" >> %s", logf)
             print cmd
             system(cmd)
 
             exit 0
         }
-    if (ARGV[1] == "stop") {
-            # Make sure that the time has been started (TODO)
-            print "Stopping the clock for today"
-            exit 0
-        }
-    if (ARGV[1] == "stats") {
-            print "No stats implemented thus far"
+    if (cliarg == "stop") {
+        # Make sure that the time has been started (TODO)
+        # Check that the time has not been finished previously.
+        while ((getline fline < logf)) {}
+        print fline
+        if (match(fline, "working") == 0) {
+            print "Cannot stop the time, when it has not been started."
+            print "usage string. blah blah blah."
             exit 1
         }
-    exit 1
+        # if (match(fline, "done")) {
+        #     print "Cannot stop the time, when it has already been stopped."
+        #     print "usage string. blah blah blah."
+        #     exit 1
+        # }
+        print "Stopping the clock for today"
+        # Calculate the hours and minutes worked today
+        # TODO - How to do this using the date cli tool.
+        # date -j -f "%a %b %d %T %Z %Y" "`date`" "+%s" // Handy for calculating time differences.
+        cmd = sprintf("echo \"$(date -R) ? done\" >> %s", logf)
+        print cmd
+        system(cmd)
+        exit 0
+    }
+    if (cliarg == "stats") {
+        print "Sum all the hours worked"
+        FS="?"
+    } else {
+        print "Unrecognized option"
+        print "Usage string. Blah blah blah."
+        exit 1
+    }
+}
+
+# For all the lines, sum the hours worked.
+{
+    print "line: " $0
+    # Sum all the hours worked
+    if (match($2, "working")) {
+        # Use awk's two-way IO for getting the Epoch time from the date command line utility.
+        cmd =  "date -j -f \"%a %b %d %T %Z %Y\" \"`date`\" \"+%s\""  | getline resout
+        print "resout " resout
+        close(cmd)
+        # work-start = system(date -j -f "%a %b %d %T %Z %Y" $1 "+%s") # Convert the time-string to Epoch time.
+        # print systime()
+        print "Working!!!"
+    } else if (match($2, "done")) {
+        # print systime()
+        cmd =  "date -j -f \"%a %b %d %T %Z %Y\" \"`date`\" \"+%s\""  | getline resout
+        print "resout " resout
+        close(cmd)
+        print "Done for the day!!!"
+        # work-end = system(date -j -f "%a %b %d %T %Z %Y" $1 "+%s") # Convert the time-string to Epoch time.
+        # cmd = sprintf("echo %s - %s | bc", work-end, work-start)
+        # seconds-worked = system(cmd)
+        # Convert the seconds to hours.
+        # cmdm = sprintf("date -j -f %s +%m")
+        # cmdh = sprintf("date -j -f %s +%h")
+        # hours-worked = system(cmdh)
+        # minutes-worked = system(cmdm)
+    } else {
+        print "The log-file is corrupted. plz fix."
+        exit 1
+    }
 }
 
 function startready() {
