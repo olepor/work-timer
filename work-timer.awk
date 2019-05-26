@@ -18,7 +18,8 @@ BEGIN {
     print ARGC
     print length(ARGV[1])
     print length(ENVIRON["WORK_LOG_FILE"])
-    logf = ENVIRON["WORK_LOG_FILE"]
+    # logf = ENVIRON["WORK_LOG_FILE"]
+    logf =ARGV[1]
     if (length(cliarg) == 0) {
             print "Usage information: blah blah blah, boring "
             exit 1
@@ -45,7 +46,7 @@ BEGIN {
             # Start the working day \o/
             # str = sprintf("")
             tformat = "%h:%s"
-            cmd = sprintf("echo \"$(date -R) ? working\" >> %s", logf)
+            cmd = sprintf("echo \"$(date) ? working\" >> %s", logf)
             print cmd
             system(cmd)
 
@@ -70,7 +71,7 @@ BEGIN {
         # Calculate the hours and minutes worked today
         # TODO - How to do this using the date cli tool.
         # date -j -f "%a %b %d %T %Z %Y" "`date`" "+%s" // Handy for calculating time differences.
-        cmd = sprintf("echo \"$(date -R) ? done\" >> %s", logf)
+        cmd = sprintf("echo \"$(date) ? done\" >> %s", logf)
         print cmd
         system(cmd)
         exit 0
@@ -93,6 +94,7 @@ BEGIN {
         # Use awk's two-way IO for getting the Epoch time from the date command line utility.
         cmd =  "date -j -f \"%a %b %d %T %Z %Y\" \"`date`\" \"+%s\""  | getline resout
         print "resout " resout
+        workstart = resout
         close(cmd)
         # work-start = system(date -j -f "%a %b %d %T %Z %Y" $1 "+%s") # Convert the time-string to Epoch time.
         # print systime()
@@ -101,8 +103,11 @@ BEGIN {
         # print systime()
         cmd =  "date -j -f \"%a %b %d %T %Z %Y\" \"`date`\" \"+%s\""  | getline resout
         print "resout " resout
+        workend = resout
         close(cmd)
         print "Done for the day!!!"
+        timeworked = workend - workstart
+        print "The time difference is: " timeworked
         # work-end = system(date -j -f "%a %b %d %T %Z %Y" $1 "+%s") # Convert the time-string to Epoch time.
         # cmd = sprintf("echo %s - %s | bc", work-end, work-start)
         # seconds-worked = system(cmd)
