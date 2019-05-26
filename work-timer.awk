@@ -98,6 +98,10 @@ BEGIN {
         timeworked = workend - workstart
         # cmd = "date -"
         print "The time difference is: " timeworked
+        "date -j -f %s " timeworked " +%H" | getline hours
+        "date -j -f %s " timeworked " +%M" | getline minutes
+        print "Hours worked: " hours
+        print "Minutes worked: " minutes
     } else {
         print "The log-file is corrupted. plz fix."
         exit 1
