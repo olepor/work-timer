@@ -44,7 +44,6 @@ BEGIN {
             }
 
             # Start the working day \o/
-            # str = sprintf("")
             tformat = "%h:%s"
             cmd = sprintf("echo \"$(date) ? working\" >> %s", logf)
             print cmd
@@ -62,15 +61,8 @@ BEGIN {
             print "usage string. blah blah blah."
             exit 1
         }
-        # if (match(fline, "done")) {
-        #     print "Cannot stop the time, when it has already been stopped."
-        #     print "usage string. blah blah blah."
-        #     exit 1
-        # }
         print "Stopping the clock for today"
         # Calculate the hours and minutes worked today
-        # TODO - How to do this using the date cli tool.
-        # date -j -f "%a %b %d %T %Z %Y" "`date`" "+%s" // Handy for calculating time differences.
         cmd = sprintf("echo \"$(date) ? done\" >> %s", logf)
         print cmd
         system(cmd)
@@ -91,16 +83,12 @@ BEGIN {
     print "line: " $0
     # Sum all the hours worked
     if (match($2, "working")) {
-        # Use awk's two-way IO for getting the Epoch time from the date command line utility.
         cmd =  "date -j -f \"%a %b %d %T %Z %Y\" \"`date`\" \"+%s\""  | getline resout
         print "resout " resout
         workstart = resout
         close(cmd)
-        # work-start = system(date -j -f "%a %b %d %T %Z %Y" $1 "+%s") # Convert the time-string to Epoch time.
-        # print systime()
         print "Working!!!"
     } else if (match($2, "done")) {
-        # print systime()
         cmd =  "date -j -f \"%a %b %d %T %Z %Y\" \"`date`\" \"+%s\""  | getline resout
         print "resout " resout
         workend = resout
@@ -108,24 +96,8 @@ BEGIN {
         print "Done for the day!!!"
         timeworked = workend - workstart
         print "The time difference is: " timeworked
-        # work-end = system(date -j -f "%a %b %d %T %Z %Y" $1 "+%s") # Convert the time-string to Epoch time.
-        # cmd = sprintf("echo %s - %s | bc", work-end, work-start)
-        # seconds-worked = system(cmd)
-        # Convert the seconds to hours.
-        # cmdm = sprintf("date -j -f %s +%m")
-        # cmdh = sprintf("date -j -f %s +%h")
-        # hours-worked = system(cmdh)
-        # minutes-worked = system(cmdm)
     } else {
         print "The log-file is corrupted. plz fix."
         exit 1
     }
-}
-
-function startready() {
-    # Use a '#' as the seperator for each line, denoting the
-    # end of a datetime, and the start of the metadata.
-
-    # system('FS="#" awk -f ')
-
 }
