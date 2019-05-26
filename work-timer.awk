@@ -45,7 +45,7 @@ BEGIN {
 
             # Start the working day \o/
             tformat = "%h:%s"
-            cmd = sprintf("echo \"$(date) ? working\" >> %s", logf)
+            cmd = sprintf("echo \"$(date)?working\" >> %s", logf)
             print cmd
             system(cmd)
 
@@ -63,7 +63,7 @@ BEGIN {
         }
         print "Stopping the clock for today"
         # Calculate the hours and minutes worked today
-        cmd = sprintf("echo \"$(date) ? done\" >> %s", logf)
+        cmd = sprintf("echo \"$(date)?done\" >> %s", logf)
         print cmd
         system(cmd)
         exit 0
@@ -83,18 +83,20 @@ BEGIN {
     print "line: " $0
     # Sum all the hours worked
     if (match($2, "working")) {
-        cmd =  "date -j -f \"%a %b %d %T %Z %Y\" \"`date`\" \"+%s\""  | getline resout
+        print "System date time: " $1
+        cmd =  "date -j -f \"%a %b %d %T %Z %Y\" " sprintf("\"%s\"", $1) " \"+%s\""  | getline resout
         print "resout " resout
         workstart = resout
         close(cmd)
         print "Working!!!"
     } else if (match($2, "done")) {
-        cmd =  "date -j -f \"%a %b %d %T %Z %Y\" \"`date`\" \"+%s\""  | getline resout
+        cmd =  "date -j -f \"%a %b %d %T %Z %Y\" " sprintf("\"%s\"", $1) " \"+%s\"" | getline resout
         print "resout " resout
         workend = resout
         close(cmd)
         print "Done for the day!!!"
         timeworked = workend - workstart
+        # cmd = "date -"
         print "The time difference is: " timeworked
     } else {
         print "The log-file is corrupted. plz fix."
