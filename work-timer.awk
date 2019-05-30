@@ -95,15 +95,22 @@ BEGIN {
         workend = resout
         close(cmd)
         print "Done for the day!!!"
-        timeworked = workend - workstart
-        # cmd = "date -"
-        print "The time difference is: " timeworked
-        "date -j -f %s " timeworked " +%H" | getline hours
-        "date -j -f %s " timeworked " +%M" | getline minutes
-        print "Hours worked: " hours
-        print "Minutes worked: " minutes
+        timeworked = timeworked + (workend - workstart)
+        requiredwork = requiredwork + 8
+
+        # print "The time difference is: " timeworked
+        # "date -j -f %s " timeworked " +%H" | getline hours
+        # "date -j -f %s " timeworked " +%M" | getline minutes
+        # print "Hours worked: " hours
+        # print "Minutes worked: " minutes
     } else {
         print "The log-file is corrupted. plz fix."
         exit 1
     }
+}
+
+END {
+    hdiff = timeworked = requiredwork
+    "date -j -f %s " hdiff " +%H:%M" | getline workdiff
+    print "Time difference: " workdiff
 }
